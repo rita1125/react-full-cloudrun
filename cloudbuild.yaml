@@ -1,0 +1,46 @@
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      [
+        'build',
+        '-t',
+        'asia-east1-docker.pkg.dev/react-next-test-459014/react-full-cloudrun/practice-next:$COMMIT_SHA',
+        '.'
+      ]
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      [
+        'push',
+        'asia-east1-docker.pkg.dev/react-next-test-459014/react-full-cloudrun/practice-next:$COMMIT_SHA'
+      ]
+
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gcloud'
+    args:
+      [
+        'run',
+        'deploy',
+        'practice-next',
+        '--image',
+        'asia-east1-docker.pkg.dev/react-next-test-459014/react-full-cloudrun/practice-next:$COMMIT_SHA',
+        '--region',
+        'asia-east1',
+        '--platform',
+        'managed',
+        '--allow-unauthenticated',
+        '--port',
+        '3000',
+        '--memory',
+        '512Mi',
+        '--cpu',
+        '1',
+        '--set-env-vars',
+        'NODE_ENV=production'
+      ]
+
+images:
+  - 'asia-east1-docker.pkg.dev/react-next-test-459014/react-full-cloudrun/practice-next:$COMMIT_SHA'
